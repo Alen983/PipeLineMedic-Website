@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playground &mdash; PipelineMedic</title>
+  <meta name="description" content="Replay of real PipelineMedic runs. Break the code, @mention the bot, review and merge. Not live.">
+  <meta name="theme-color" content="#f4f2ee">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="playground.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="page">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="index.html" aria-label="PipelineMedic, home">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h5l2-4 3 8 2-4h8"/></svg>
+        <span>PipelineMedic</span>
+      </a>
+      <div class="nav__links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="problem.html">The problem</a>
+        <a href="about.html">About</a>
+        <a href="playground.html" class="is-active" aria-current="page">Playground</a>
+        <a href="links.html">Links</a>
+      </div>
+      <div class="nav__cta">
+        <a class="btn btn--line btn--sm" href="https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/34656727/showcase" target="_blank" rel="noopener">Code (GitLab) &nearr;</a>
+        <button class="menu-btn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span><span></span></button>
+      </div>
+    </nav>
+
+    <div class="notice" role="note">
+      <p><span class="dot" aria-hidden="true"></span><span><strong>Replay of real runs. Not live.</strong> Real PipelineMedic runs on GitLab Duo.</span></p>
+      <a class="btn btn--dark btn--sm" href="https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/34656727/showcase" target="_blank" rel="noopener">Try it for real <span class="btn__arrow" aria-hidden="true">&nearr;</span></a>
+    </div>
+
+    <main class="pg" id="main">
+      <header class="head">
+        <div>
+          <p class="num"><b>03</b> / 04</p>
+          <h1 class="title">Playground<i>.</i></h1>
+        </div>
+        <ol class="steps" id="steps" aria-label="Steps"></ol>
+      </header>
+
+      <section class="pcard pcard--pipe" aria-label="Pipeline">
+        <div class="pcard__head">Pipeline<small id="psub"></small><span class="sp"></span><div class="tabs" id="tabs" role="group" aria-label="Scenario"></div><span id="pchip"></span></div>
+        <div class="pcard__body" id="pbody"></div>
+      </section>
+
+      <div class="work" id="work">
+        <div class="work__in">
+          <div class="cols">
+            <div class="col" id="left"></div>
+            <div class="col" id="right"></div>
+          </div>
+          <p class="fine">Data on this page is copied from real PipelineMedic runs on GitLab. Nothing here is executed.</p>
+        </div>
+        <nav class="pager" aria-label="Pages">
+          <a href="about.html"><span>&larr; Back</span><strong>About</strong></a>
+          <a href="links.html"><span>Next &rarr;</span><strong>Links</strong></a>
+        </nav>
+      </div>
+      <div class="sr" id="live" role="status" aria-live="polite"></div>
+    </main>
+
+    <section class="bar" id="bar" aria-label="Controls">
+      <div class="bar__main">
+        <span class="turn" id="turn"></span>
+        <p id="hint"></p>
+        <button class="btn btn--text" id="reset" type="button" hidden>Start over</button>
+      </div>
+      <div class="bar__btns">
+        <button class="btn btn--dark btn--lg" id="act" type="button"></button>
+      </div>
+    </section>
+  </div>
+
+  <script src="main.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  /* ---------------------------------------------------------------------
+     Scenario data. Captured from real runs only; nothing else is invented.
+     - discount: showcase !4. The bot comment is the real text, word for word.
+     - cart:     cart-demo !1. Captured fields only. Paste the real MR comment
+                 into `commentHtml` to show it verbatim.
+     - `job` is the name shown on pipeline nodes. Rename it to match the real job.
+     Delays in the script are UI pacing only, not data.
+     --------------------------------------------------------------------- */
+  const BOT = "PipelineMedic Heal";
+  const BOT_HANDLE = "@ai-pipelinemedic-heal-gitlab-ai-hackathon";
+  const USER = "You";
+
+  const SCENARIOS = {
+    discount: {
+      label: "Wrong discount formula",
+      project: "showcase", mr: "!4", branch: "fix/pipeline-medic",
+      file: "src/discount.js", fn: "applyDiscount()",
+      commit: "b5b14f6a", session: "9869793", job: "test",
+      good: "price * (1 - percent/100)", bad: "price * percent/100",
+      failSummary: "3 of 5 tests failed",
+      failing: ["10 !== 90", "0 !== 50", "25 !== 0"],
+      rootCause: "Commit b5b14f6a changed applyDiscount to return the discount amount instead of the discounted price.",
+      confidence: "high", attempts: "1/2", testsUntouched: true,
+      commentHtml:
+        '<p>Root cause: commit <a href="#">b5b14f6a</a> changed <code>applyDiscount</code> to return the discount amount (<code>price * percent/100</code>) instead of the discounted price. The MR changes it to <code>price * (1 - percent/100)</code> in <code>src/discount.js</code>. Tests are untouched. Review the diff and merge only if the pipeline is green. Deploys stay manual.</p>'
+    },
+    cart: {
+      label: "Wrong cart total",
+      project: "cart-demo", mr: "!1", branch: "fix/pipeline-medic",
+      file: "src/cart.js", fn: "cartTotal()",
+      commit: null, session: null, job: "test",
+      good: "item.price * item.qty", bad: "item.price + item.qty",
+      failSummary: "Tests failed",
+      failing: ["20 !== 35"],
+      rootCause: "cartTotal used price + qty instead of price * qty.",
+      confidence: "high", attempts: "1/2", testsUntouched: false,
+      commentHtml:
+        '<p>Root cause: <code>cartTotal</code> used <code>price + qty</code> instead of <code>price * qty</code>. The MR changes it to <code>item.price * item.qty</code> in <code>src/cart.js</code>.</p>'
+    }
+  };
+
+  /* ------------------------------ state ------------------------------- */
+  /* 0 idle (main green)        4 bot is fixing
+     1 main pipeline running    5 MR open, MR pipeline running
+     2 main failed              6 MR pipeline passed, waiting for you
+     3 typing the @mention      7 merged, main pipeline running   8 main green */
+  const state = { id: "discount", step: 0, typed: "" };
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let timers = [], typer = null;
+
+  const $ = (s) => document.querySelector(s);
+  const sc = () => SCENARIOS[state.id];
+  const say = (t) => { $("#live").textContent = t; };
+  const stopAll = () => { timers.forEach(clearTimeout); timers = []; clearInterval(typer); typer = null; };
+  const later = (fn, ms) => timers.push(setTimeout(fn, reduce ? 0 : ms));
+  const tag = (cls, text) => `<span class="tag tag--${cls}"><i></i>${text}</span>`;
+
+  /* ------------------------------ views ------------------------------- */
+  function renderTabs() {
+    $("#tabs").innerHTML = Object.entries(SCENARIOS).map(([id, s]) =>
+      `<button class="stab" type="button" data-id="${id}" aria-pressed="${id === state.id}">${s.label}</button>`
+    ).join("");
+  }
+
+  function renderSteps() {
+    const s = state.step;
+    const items = [
+      ["Break the code", s >= 2, s <= 1],
+      ["@mention PipelineMedic", s >= 6, s >= 2 && s <= 5],
+      ["Review and merge", s >= 8, s === 6 || s === 7]
+    ];
+    $("#steps").innerHTML = items.map(([t, done, active], i) =>
+      `<li class="step${done ? " is-done" : ""}${active ? " is-active" : ""}"${active ? ' aria-current="step"' : ""}><b>${done ? "&#10003;" : "0" + (i + 1)}</b><span class="lbl">${t}</span></li>`
+    ).join("");
+  }
+
+  const SPIN = '<span class="spin" aria-hidden="true"></span>';
+  function renderAction() {
+    const s = sc();
+    const map = {
+      0: ["Main is green. Break the code to start.", "Break the code", false, true, ""],
+      1: ["The pipeline is running on main.", SPIN + "Running", true, false, ""],
+      2: ["Main is red. Ask PipelineMedic to look at it.", "@mention PipelineMedic", false, true, ""],
+      3: ["Writing the comment.", "Commenting", true, false, ""],
+      4: ["PipelineMedic is working on the fix.", SPIN + "Fixing", true, false, ""],
+      5: [`PipelineMedic opened ${s.mr}. Its pipeline is running.`, SPIN + "Running", true, false, ""],
+      6: ["Review the diff in the merge request. Merge only if the pipeline is green. Deploys stay manual.", `Merge ${s.mr}`, false, true, "go"],
+      7: ["Merged. The pipeline is running on main.", SPIN + "Running", true, false, ""],
+      8: ["Main is green. Deploys stay manual.", "Try it again", false, true, ""]
+    }[state.step];
+    $("#hint").textContent = map[0];
+    const a = $("#act");
+    a.innerHTML = map[1]; a.disabled = map[2];
+    a.className = "btn btn--lg " + (map[4] === "go" ? "btn--go" : "btn--dark");
+    const t = $("#turn");
+    t.className = "turn" + (map[3] ? " is-you" : "");
+    t.innerHTML = "<i></i>" + (map[3] ? "Your turn" : "Working");
+    // "Start over" only makes sense mid-run; at the start and the end the main button already does it
+    $("#reset").hidden = state.step === 0 || state.step === 8;
+  }
+
+  /* pipeline graph --------------------------------------------------- */
+  function nodeStates() {
+    const s = state.step;
+    return {
+      a1: "pass",
+      a2: s === 0 ? "pass" : s === 1 ? "run" : "fail",
+      b1: s < 4 ? "pend" : s === 4 ? "run" : "pass",
+      b2: s < 5 ? "pend" : s === 5 ? "run" : "pass",
+      b3: s < 6 ? "pend" : s === 6 ? "wait" : "done",
+      a3: s < 7 ? "pend" : s === 7 ? "run" : "pass"
+    };
+  }
+  const ICON = { pend: "", run: "", pass: "&#10003;", fail: "&#10005;", wait: "!", done: "&#10003;" };
+
+  function node(key, st, x, y, label, sub, extra = "", ico = null) {
+    return `<div class="node is-${st} ${extra}" style="left:${x}%;top:${y}%" data-k="${key}">
+      <span class="ico" aria-hidden="true">${ico || ICON[st]}</span>
+      <span>${label}<small>${sub}</small></span></div>`;
+  }
+
+  function renderPipeline() {
+    const s = sc(), st = state.step, n = nodeStates();
+    const X = [8.33, 25, 41.67, 58.33, 75, 91.67], YA = 30, YB = 72;
+    const statusMap = {
+      0: ["ok", "Passed", "on main"],
+      1: ["run", "Running", "on main"],
+      2: ["bad", "Failed", "on main"],
+      3: ["bad", "Failed", "on main"],
+      4: ["bad", "Failed", "on main"],
+      5: ["run", "Running", `on ${s.branch}`],
+      6: ["ok", "Passed", `on ${s.branch}`],
+      7: ["run", "Running", "on main"],
+      8: ["ok", "Passed", "on main"]
+    }[st];
+    $("#psub").textContent = statusMap[2];
+    $("#pchip").innerHTML = tag(statusMap[0], statusMap[1]);
+
+    const on = [true, st >= 4, st >= 5, st >= 6, st >= 7].map((v) => (v ? "on" : ""));
+    const botIco = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5l2-4 3 8 2-4h8"/></svg>';
+    const commitSub = st === 0 ? "main" : (s.commit || "broken commit");
+
+    $("#pbody").innerHTML = `
+      <div class="graph-wrap"><div class="graph" role="img" aria-label="Pipeline graph for the ${s.label} scenario">
+        <svg viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true">
+          <path class="${on[0]}" d="M50 45 H150"/>
+          <path class="${on[1]}" d="M150 45 C200 45 200 108 250 108"/>
+          <path class="${on[2]}" d="M250 108 H350"/>
+          <path class="${on[3]}" d="M350 108 H450"/>
+          <path class="${on[4]}" d="M450 108 C500 108 500 45 550 45"/>
+        </svg>
+        <span class="lane" style="top:0">main</span>
+        <span class="lane" style="top:56%">${s.branch}</span>
+        ${node("a1", n.a1, X[0], YA, "Commit", commitSub, "", "&#9679;")}
+        ${node("a2", n.a2, X[1], YA, s.job, "main")}
+        ${node("b1", n.b1, X[2], YB, "PipelineMedic", "fixes it", "is-bot", botIco)}
+        ${node("b2", n.b2, X[3], YB, s.job, "MR pipeline")}
+        ${node("b3", n.b3, X[4], YB, "Merge", "you", "", n.b3 === "wait" ? "!" : "&#10003;")}
+        ${node("a3", n.a3, X[5], YA, s.job, "main after merge")}
+      </div></div>`;
+  }
+
+  /* code + workspace ------------------------------------------------- */
+  function renderLeft() {
+    const s = sc(), st = state.step;
+    const broken = st >= 1 && st <= 6;
+    const body = broken
+      ? `<div class="fileline"><span>${s.file}</span><span class="tag">${s.commit ? "commit " + s.commit : "latest commit"}</span><span class="tag">main</span></div>
+         <pre class="code" aria-label="Diff of the commit on main"><span class="row"><span class="m"> </span><span class="fn">${s.fn}</span></span><span class="row del"><span class="m">-</span>${s.good}</span><span class="row add"><span class="m">+</span>${s.bad}</span></pre>
+         <p class="caption">The change that turned main red.</p>`
+      : `<div class="fileline"><span>${s.file}</span><span class="tag">main</span>${st >= 7 ? `<span class="tag tag--done">fixed by ${s.mr}</span>` : ""}</div>
+         <pre class="code" aria-label="Current code on main"><span class="row"><span class="m"> </span><span class="fn">${s.fn}</span></span><span class="row${st >= 7 ? " add" : ""}"><span class="m">${st >= 7 ? "+" : " "}</span>${s.good}</span></pre>`;
+    const fail = st >= 2 && st <= 5
+      ? `<div class="out" role="group" aria-label="Failing output"><div class="h">${s.failSummary}</div>${s.failing.map((l) => `<div>${l}</div>`).join("")}</div>` : "";
+    $("#left").innerHTML = `
+      <section class="pcard" aria-label="Code">
+        <div class="pcard__head">${s.project}<small>${s.file}</small></div>
+        <div class="pcard__body">${body}${fail}</div>
+      </section>`;
+  }
+
+  function threadEvents() {
+    const s = sc(), st = state.step;
+    const sess = s.session ? ` <a href="#">${s.session}</a>` : "";
+    const ev = (html) => `<li class="ev"><span class="pt"></span><div>${html}</div></li>`;
+    const out = [];
+    if (st >= 4) {
+      out.push(`<li class="cmt"><span class="av av--me" aria-hidden="true">Y</span><div class="cmt__box"><div class="cmt__head"><b>${USER}</b></div><div class="cmt__body"><p><code>${BOT_HANDLE}</code></p></div></div></li>`);
+      out.push(ev(`<b>${BOT}</b> started session${sess} triggered by <b>${USER}</b>`));
+    }
+    if (st >= 5) {
+      out.push(ev(`<b>${BOT}</b> mentioned in merge request <a href="#">${s.mr}</a>${st >= 7 ? " (merged)" : ""}`));
+      out.push(`<li class="cmt"><span class="av av--bot" aria-hidden="true">PM</span><div class="cmt__box"><div class="cmt__head"><b>${BOT}</b><span>${BOT_HANDLE}</span></div><div class="cmt__body"><p>PipelineMedic opened a fix MR: <a href="#">${s.mr}${st >= 7 ? " (merged)" : ""}</a></p>${s.commentHtml}</div></div></li>`);
+    }
+    if (st >= 6) out.push(ev(`<b>${BOT}</b> completed session${sess}`));
+    if (st >= 7) out.push(ev(`<b>${USER}</b> merged merge request <a href="#">${s.mr}</a>`));
+    return out.join("");
+  }
+
+  function renderRight() {
+    const s = sc(), st = state.step;
+    let mr = "";
+    if (st >= 5) {
+      const merged = st >= 7;
+      const pipe = st === 5 ? tag("run", "MR pipeline running") : tag("ok", "MR pipeline passed");
+      mr = `
+      <section class="pcard" id="mr" aria-label="Merge request ${s.mr}">
+        <div class="pcard__head">${s.mr}<small>${s.branch} &rarr; main</small><span class="sp"></span>${merged ? tag("done", "Merged") : tag("run", "Open")}</div>
+        <div class="pcard__body">
+          <div class="label">Report</div>
+          <dl class="kv">
+            <dt>Root cause</dt><dd>${s.rootCause}</dd>
+            <dt>Files changed</dt><dd><code>${s.file}</code></dd>
+            <dt>Confidence</dt><dd>${s.confidence}</dd>
+            <dt>Attempts</dt><dd>${s.attempts}</dd>
+            ${s.testsUntouched ? "<dt>Tests</dt><dd>Untouched</dd>" : ""}
+          </dl>
+          <div class="label">Changes</div>
+          <div class="fileline"><span>${s.file}</span><span class="tag">1 line</span></div>
+          <pre class="code" aria-label="One-line diff"><span class="row"><span class="m"> </span><span class="fn">${s.fn}</span></span><span class="row del"><span class="m">-</span>${s.bad}</span><span class="row add"><span class="m">+</span>${s.good}</span></pre>
+          <div class="label">Pipeline</div>
+          ${pipe}
+          <p class="gate">${merged
+            ? `Merged by you. Main is ${st === 8 ? "green" : "running"}. Deploys stay manual.`
+            : st === 5 ? "Waiting for the pipeline." : `Review the diff, then use Merge ${s.mr} in the bar below.`}</p>
+        </div>
+      </section>`;
+    }
+    const field = st === 3
+      ? `<div class="field has caret" role="textbox" aria-readonly="true" tabindex="0" aria-label="Comment being typed">${state.typed}</div>`
+      : `<div class="field" role="textbox" aria-readonly="true" tabindex="0">Write a comment&hellip;</div>`;
+    const idle = st < 3 ? `<p class="empty">No activity yet.${st === 2 ? " Main is red." : ""}</p>` : "";
+    $("#right").innerHTML = mr + `
+      <section class="pcard" aria-label="Issue thread">
+        <div class="pcard__head">Issue thread</div>
+        <div class="pcard__body">
+          ${idle}
+          <ul class="tl">${threadEvents()}</ul>
+          ${st >= 7 ? "" : `<div class="composer">${field}<button class="btn btn--line" type="button" aria-disabled="true">Comment</button></div>`}
+        </div>
+      </section>`;
+  }
+
+  function render() { renderTabs(); renderSteps(); renderAction(); renderPipeline(); renderLeft(); renderRight(); }
+
+  /* bring a new card into view if its top is off screen or hidden behind the action bar */
+  function reveal(sel) {
+    const el = $(sel);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top, barTop = $("#bar").getBoundingClientRect().top;
+    if (top < 0 || top > barTop - 140) el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }
+
+  /* --------------------------- transitions ---------------------------- */
+  function go(step, message) {
+    hideTip();
+    state.step = step; render();
+    if (message) say(message);
+  }
+
+  function breakCode() {
+    go(1, "The pipeline is running on main.");
+    later(() => go(2, `Main pipeline failed. ${sc().failSummary}. ${sc().failing.join(", ")}.`), 1500);
+  }
+
+  function mention() {
+    state.typed = ""; go(3, "");
+    let i = 0;
+    const done = () => {
+      go(4, "Comment posted. PipelineMedic started a session and is working on the fix.");
+      later(() => {
+        go(5, `PipelineMedic opened merge request ${sc().mr}. Its pipeline is running.`);
+        reveal("#mr");
+        later(() => { go(6, `The pipeline on ${sc().branch} passed. Review the diff and merge.`); reveal("#mr"); }, 1700);
+      }, 2200);
+    };
+    if (reduce) { state.typed = BOT_HANDLE; done(); return; }
+    typer = setInterval(() => {
+      state.typed = BOT_HANDLE.slice(0, ++i);
+      const f = document.querySelector(".composer .field");
+      if (f) f.textContent = state.typed;
+      if (i >= BOT_HANDLE.length) { clearInterval(typer); typer = null; later(done, 350); }
+    }, 28);
+  }
+
+  function merge() {
+    go(7, `Merge request ${sc().mr} merged. The pipeline is running on main.`);
+    later(() => { go(8, "Main pipeline passed. Deploys stay manual."); const a = $("#act"); if (a) a.focus(); }, 1500);
+  }
+
+  function reset(id) {
+    stopAll();
+    if (id) state.id = id;
+    state.typed = ""; go(0, "Reset. Main is green.");
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  }
+
+  /* ------------------------------ events ------------------------------- */
+  $("#act").addEventListener("click", () => {
+    const s = state.step;
+    if (s === 0) breakCode();
+    else if (s === 2) mention();
+    else if (s === 6) merge();
+    else if (s === 8) reset();
+  });
+  $("#reset").addEventListener("click", () => { reset(); $("#act").focus(); });
+
+  /* The comment box is a replay, not a real input. If someone tries it, point them at the real next action. */
+  const TIPS = {
+    0: () => `Click <b>Break the code</b> in the bar below to start.`,
+    1: () => `The pipeline is still running. Give it a second.`,
+    2: () => `Click <b>@mention PipelineMedic</b> in the bar below. It writes this comment for you.`,
+    3: () => `PipelineMedic is writing this comment for you.`,
+    4: () => `PipelineMedic is already working on the fix.`,
+    5: () => `PipelineMedic is already working on the fix.`,
+    6: () => `Review the diff, then click <b>Merge ${sc().mr}</b> in the bar below.`
+  };
+  let tipEl = null, tipTimer = null, tipY = 0;
+
+  function hideTip() {
+    clearTimeout(tipTimer);
+    if (tipEl) { tipEl.remove(); tipEl = null; }
+  }
+
+  function showTip(anchor) {
+    const make = TIPS[state.step];
+    if (!make || !anchor) return;
+    hideTip();
+    const barTop = $("#bar").getBoundingClientRect().top;
+    let r = anchor.getBoundingClientRect();
+    if (r.top < 70 || r.bottom > barTop) {            // hidden behind the nav or the bar: bring it into view first
+      anchor.scrollIntoView({ block: "center" });
+      r = anchor.getBoundingClientRect();
+    }
+    tipEl = document.createElement("div");
+    tipEl.className = "tip";
+    tipEl.setAttribute("role", "status");
+    tipEl.innerHTML = make();
+    document.body.appendChild(tipEl);
+    const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    const below = r.top - h - 12 < 8;                  // no room above, so flip below
+    const left = Math.min(Math.max(r.left, 8), window.innerWidth - w - 8);
+    tipEl.style.left = left + "px";
+    tipEl.style.top = (below ? r.bottom + 12 : r.top - h - 12) + "px";
+    tipEl.style.setProperty("--arrow-x", Math.min(Math.max(r.left + 28 - left, 14), w - 22) + "px");
+    tipEl.classList.toggle("tip--below", below);
+    tipY = window.scrollY;
+    say(tipEl.textContent);
+    tipTimer = setTimeout(hideTip, 4000);
+
+    // a gentle ring on the button that actually does something
+    const act = $("#act");
+    if (!act.disabled) {
+      act.classList.remove("nudge"); void act.offsetWidth; act.classList.add("nudge");
+      act.addEventListener("animationend", () => act.classList.remove("nudge"), { once: true });
+    }
+  }
+
+  $("#right").addEventListener("click", (e) => {
+    const t = e.target.closest(".composer .field, .composer .btn");
+    if (t) showTip(t.closest(".composer"));
+  });
+  $("#right").addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches(".composer .field")) { e.preventDefault(); showTip(e.target.closest(".composer")); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".composer")) hideTip(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+  window.addEventListener("scroll", () => { if (tipEl && Math.abs(window.scrollY - tipY) > 40) hideTip(); }, { passive: true });
+  $("#tabs").addEventListener("click", (e) => {
+    const b = e.target.closest("button.stab");
+    if (!b) return;
+    if (b.dataset.id !== state.id) reset(b.dataset.id);
+  });
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('.pg a[href="#"]'); if (a) e.preventDefault();
+  });
+
+  /* the fixed bar's height drives the page padding */
+  const bar = $("#bar");
+  const fit = () => document.documentElement.style.setProperty("--bar-h", bar.offsetHeight + "px");
+  if ("ResizeObserver" in window) new ResizeObserver(fit).observe(bar);
+  window.addEventListener("resize", fit);
+
+  render(); fit();
+  /*TEST_HOOK*/
+})();
+</script>
+</body>
+</html>
